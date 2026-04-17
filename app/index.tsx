@@ -1,7 +1,8 @@
 import HeaderChat from "@/components/header-chat";
 import Record from "@/components/record";
 import RecordList from "@/components/record-list";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 type Recording = {
@@ -12,14 +13,41 @@ type Recording = {
   uri: string;
 };
 
-export default function HomeScreen() {
-  const [recordings, setRecordings] = useState<Recording[]>([]);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  // Cargar grabaciones al iniciar
+  useEffect(() => {
+    const cargarGrabaciones = async () => {
+      try {
+        const guardadas = await AsyncStorage.getItem(STORAGE_KEY);
+        if (guardadas) {
+          setRecordings(JSON.parse(guardadas));
+        }
+      } catch (error) {
+        console.log("Error al cargar:", error);
+      }
+    };
+    cargarGrabaciones();
+  }, []);
+
+  // Guardar cuando cambien las grabaciones
+  useEffect(() => {
+    const guardarGrabaciones = async () => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(recordings));
+      } catch (error) {
+        console.log("Error al guardar:", error);
+      }
+    };
+    guardarGrabaciones();
+  }, [recordings]);
 
   const encontrarNumeroLibre = () => {
     const numerosUsados = recordings.map((r) => {
-      const match = r.title.match(/Grabación nº(\d+)/);
       return match ? parseInt(match[1]) : 0;
     });
+<<<<<<< HEAD
 
     let numero = 1;
     while (numerosUsados.includes(numero)) {
@@ -28,36 +56,64 @@ export default function HomeScreen() {
     return numero;
   };
 
-  const addRecording = (uri: string, durationMs: number) => {
-    const numeroLibre = encontrarNumeroLibre();
-    const nuevaGrabacion = {
-      id: Date.now().toString(),
-      title: `Grabación nº${numeroLibre}`,
+      title:
+        nombre && nombre.length > 0 ? nombre : `Grabación nº${numeroLibre}`,
       date: new Date().toLocaleDateString(),
-      duration: Math.round(durationMs / 1000) + " segundos",
-      uri: uri,
+      duration: Math.round(durationMs / 1000) + " seg",
+      uri,
     };
-
-    const nuevasGrabaciones = [nuevaGrabacion, ...recordings];
-    setRecordings(nuevasGrabaciones);
+    setRecordings((prev) => [nuevaGrabacion, ...prev]);
   };
 
   const eliminarRecording = (id: string) => {
-    const grabacionesFiltradas = recordings.filter((r) => r.id !== id);
-    setRecordings(grabacionesFiltradas);
+    setRecordings((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const eliminarSeleccionados = () => {
+    setRecordings((prev) => prev.filter((r) => !selectedIds.includes(r.id)));
+    setSelectedIds([]);
+    setSelectionMode(false);
+  };
+
+  const eliminarTodos = () => {
+    setRecordings([]);
+    setSelectedIds([]);
+    setSelectionMode(false);
+  };
+
+  const cancelarSeleccion = () => {
+    setSelectedIds([]);
+    setSelectionMode(false);
+>>>>>>> record
   };
 
   return (
     <View style={styles.container}>
+      <HeaderChat
+        selectionMode={selectionMode}
+        selectedCount={selectedIds.length}
+        onSelectMode={() => setSelectionMode(true)}
+        onCancelSelect={cancelarSeleccion}
+        onDeleteSelected={eliminarSeleccionados}
+        onDeleteAll={eliminarTodos}
+        totalCount={recordings.length}
+      />
       <View style={styles.top}>
-        <HeaderChat />
         <RecordList
           recordings={recordings}
           onDeleteRecording={eliminarRecording}
+          selectionMode={selectionMode}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
         />
       </View>
-
-      <Record onSave={addRecording} />
+      {!selectionMode && <Record onSave={addRecording} />}
     </View>
   );
 }
