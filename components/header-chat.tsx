@@ -16,7 +16,7 @@ const HeaderChat = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    paddingTop: 68,
+    // paddingTop: 68,
     backgroundColor: "#2b2b2b",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#fff",
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: "900",
   },
   button: {

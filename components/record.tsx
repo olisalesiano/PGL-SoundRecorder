@@ -21,8 +21,17 @@ const Record = ({ onSave }: Props) => {
   const handlePress = async () => {
     if (isRecording) {
       await audioRecorder.stop();
-      if (audioRecorder.uri) onSave(audioRecorder.uri, durationMillis ?? 0);
+
+      if (audioRecorder.uri) {
+        onSave(audioRecorder.uri, durationMillis ?? 0);
+      }
     } else {
+      await AudioModule.setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
+        shouldRouteThroughEarpiece: false,
+      });
+
       await audioRecorder.prepareToRecordAsync();
       audioRecorder.record();
     }
@@ -36,7 +45,7 @@ const Record = ({ onSave }: Props) => {
         </Text>
         <Ionicons
           name={isRecording ? "stop" : "mic"}
-          size={32}
+          size={26}
           color="#DE2525"
         />
       </Pressable>
@@ -55,7 +64,7 @@ const styles = StyleSheet.create({
   record_text: {
     color: "#DE2525",
     fontWeight: "900",
-    fontSize: 30,
+    fontSize: 25,
     marginRight: 10,
   },
 });

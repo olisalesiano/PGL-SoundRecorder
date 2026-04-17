@@ -1,4 +1,5 @@
-import { useAudioPlayer } from "expo-audio";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { AudioModule, useAudioPlayer } from "expo-audio";
 import React, { useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -22,17 +23,45 @@ const RecordItem = ({
   const player = useAudioPlayer(uri);
   const [estaReproduciendo, setEstaReproduciendo] = useState(false);
 
-  const manejarReproduccion = () => {
+  React.useEffect(() => {
+    AudioModule.setAudioModeAsync({
+      allowsRecording: false,
+      playsInSilentMode: true,
+      shouldRouteThroughEarpiece: false,
+    });
+  }, []);
+
+  React.useEffect(() => {
+    const verificarFinAudio = setInterval(() => {
+      if (
+        player.currentTime >= player.duration &&
+        player.duration > 0 &&
+        estaReproduciendo
+      ) {
+        player.pause();
+        player.seekTo(0);
+        setEstaReproduciendo(false);
+      }
+    }, 100);
+
+    return () => clearInterval(verificarFinAudio);
+  }, [player, estaReproduciendo]);
+
+  const manejarReproduccion = async () => {
     if (estaReproduciendo) {
       player.pause();
       setEstaReproduciendo(false);
     } else {
-      player.play();
+      if (player.currentTime >= player.duration) {
+        player.seekTo(0);
+      }
+      await player.play();
       setEstaReproduciendo(true);
     }
   };
 
   const eliminarAudio = () => {
+    player.pause();
     onDelete();
   };
 
@@ -63,7 +92,11 @@ const RecordItem = ({
           ]}
           onPress={manejarReproduccion}
         >
-          <Text style={styles.playIcon}>{estaReproduciendo ? "⏸" : "▶"}</Text>
+          <Ionicons
+            name={estaReproduciendo ? "pause" : "play"}
+            size={16}
+            color="#ffffff"
+          />
         </Pressable>
       </View>
     </ReanimatedSwipeable>
@@ -142,11 +175,6 @@ const styles = StyleSheet.create({
   },
   playBtnPressed: {
     backgroundColor: "#6e6d6d",
-  },
-  playIcon: {
-    fontSize: 12,
-    color: "#ffffff",
-    marginLeft: 2,
   },
   botonEliminar: {
     backgroundColor: "#DE2525",
