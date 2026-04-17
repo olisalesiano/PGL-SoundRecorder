@@ -13,6 +13,10 @@ type Recording = {
   uri: string;
 };
 
+const STORAGE_KEY = "grabaciones_audio";
+
+export default function Index() {
+  const [recordings, setRecordings] = useState<Recording[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -45,9 +49,9 @@ type Recording = {
 
   const encontrarNumeroLibre = () => {
     const numerosUsados = recordings.map((r) => {
+      const match = r.title.match(/Grabación nº(\d+)/);
       return match ? parseInt(match[1]) : 0;
     });
-<<<<<<< HEAD
 
     let numero = 1;
     while (numerosUsados.includes(numero)) {
@@ -56,6 +60,10 @@ type Recording = {
     return numero;
   };
 
+  const addRecording = (uri: string, durationMs: number, nombre?: string) => {
+    const numeroLibre = encontrarNumeroLibre();
+    const nuevaGrabacion: Recording = {
+      id: Date.now().toString(),
       title:
         nombre && nombre.length > 0 ? nombre : `Grabación nº${numeroLibre}`,
       date: new Date().toLocaleDateString(),
@@ -90,7 +98,6 @@ type Recording = {
   const cancelarSeleccion = () => {
     setSelectedIds([]);
     setSelectionMode(false);
->>>>>>> record
   };
 
   return (

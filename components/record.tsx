@@ -71,6 +71,10 @@ const Record = ({ onSave }: Props) => {
       });
       await audioRecorder.prepareToRecordAsync();
       audioRecorder.record();
+    }
+  };
+
+  const confirmar = () => {
     if (uriPendiente.current) {
       onSave(
         uriPendiente.current,
@@ -87,7 +91,7 @@ const Record = ({ onSave }: Props) => {
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}>
-      {/* Ondas de audio, lo hice con ia porque no sabía implementarlo... */}
+      {/* Ondas de audio */}
       {isRecording && (
         <View style={styles.waveform}>
           {alturas.map((h, i) => (

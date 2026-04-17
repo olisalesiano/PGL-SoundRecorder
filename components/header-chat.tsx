@@ -147,7 +147,11 @@ const styles = StyleSheet.create({
   title: {
     color: "#fff",
     fontSize: 22,
+    fontWeight: "900",
+  },
+  button: {
     padding: 8,
+  },
   accionText: {
     color: "#DE2525",
     fontSize: 16,
